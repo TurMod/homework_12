@@ -48,16 +48,14 @@ class AddressBook(UserDict):
         
     def search(self, arguments):
         match_contacts = []
-        if arguments.isdigit():
-            for name, contact in self.data.items():
-                for phone in contact.phones:
-                    if arguments in phone.value:
-                        match_contacts.append(name)
-                        break
-        else:
-            for name in self.data.keys():
-                if arguments in name:
+        for name, contact in self.data.items():
+            if arguments in name:
+                match_contacts.append(name)
+                continue
+            for phone in contact.phones:
+                if arguments in phone.value:
                     match_contacts.append(name)
+                    break
         return f'List of matches: {match_contacts}' if match_contacts else None
 
 class Record:
