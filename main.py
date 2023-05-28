@@ -1,6 +1,7 @@
 from homework import *
 import pickle
 
+
 def main():
 
     try:
@@ -26,7 +27,8 @@ def main():
             except ContactDoesNotExistError:
                 print('This contact does not exist!')
             except PhoneDoesNotExistError:
-                print('The phone number that you\'re trying to change/delete does not exist!')
+                print(
+                    'The phone number that you\'re trying to change/delete does not exist!')
             except PhoneExistsError:
                 print('The phone number that you\'re trying to add already exist!')
             except (AttributeError, IndexError):
@@ -35,14 +37,15 @@ def main():
                 print('Put birthday in format DD.MM.YYYY')
             except OnlyNumbersError:
                 print('Phone number must include only numbers!')
-        
+
         with open('data.bin', 'wb') as fh:
             pickle.dump(addressbook, fh)
 
     @input_error
     def main_handler():
         while True:
-            command, *data = input('Write command: ').lower().strip().split(' ', 1)
+            command, * \
+                data = input('Write command: ').lower().strip().split(' ', 1)
             if data:
                 data = data[0].split(' ')
             else:
@@ -54,13 +57,20 @@ def main():
             elif command == 'show_all':
                 result = addressbook.iterator()
             else:
-                result = addressbook.change_record(command, data)
+                if data[0] not in addressbook.data:
+                    raise ContactDoesNotExistError
+                elif command == 'phone':
+                    result = [
+                        i.value for i in addressbook.data.get(data[0]).phones]
+                else:
+                    changes = getattr(addressbook.data.get(data[0]), command)
+                    result = changes(*data[1:])
 
             if result == 'break':
                 return 'break'
             else:
                 print(result)
-    
+
 
 if '__main__' == __name__:
     main()
