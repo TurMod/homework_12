@@ -1,4 +1,4 @@
-from homework import *
+from fields import *
 import pickle
 
 
@@ -11,32 +11,30 @@ def main():
         addressbook = AddressBook()
 
     def input_error(func):
-        print('List of available commands:')
-        print('add_record name phone(only numbers) birthday(format: DD.MM.YYYY)\ndelete_record name\nadd name phone\ndelete name phone\nchange name old_phone new_phone\nclose/exit\nphone name\ndays_to_birthday name\nsearch arguments')
+        ListOfCommandsMessage.message()
         while True:
             try:
                 result = func()
                 if result == 'break':
                     break
             except TypeError:
-                print('You didn\'t put user\'s phone or name!')
+                TypeErrorMessage.message()
             except (UnboundLocalError, KeyError):
-                print('Error!')
+                KeyErrorMessage.message()
             except ContactExistsError:
-                print('This contact already exist!')
+                ContactExistsErrorMessage.message()
             except ContactDoesNotExistError:
-                print('This contact does not exist!')
+                ContactDoesNotExistErrorMessage.message()
             except PhoneDoesNotExistError:
-                print(
-                    'The phone number that you\'re trying to change/delete does not exist!')
+                PhoneDoesNotExistErrorMessage.message()
             except PhoneExistsError:
-                print('The phone number that you\'re trying to add already exist!')
+                PhoneExistsErrorMessage.message()
             except (AttributeError, IndexError):
-                print('This command does not exist!')
+                IndexErrorMessage.message()
             except ValueError:
-                print('Put birthday in format DD.MM.YYYY')
+                ValueErrorMessage.message()
             except OnlyNumbersError:
-                print('Phone number must include only numbers!')
+                OnlyNumbersErrorMessage.message()
 
         with open('data.bin', 'wb') as fh:
             pickle.dump(addressbook, fh)
@@ -68,9 +66,6 @@ def main():
 
             if result == 'break':
                 return 'break'
-            else:
-                print(result)
-
 
 if '__main__' == __name__:
     main()

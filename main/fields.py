@@ -1,31 +1,8 @@
 from collections import UserDict
 from collections.abc import Iterator
 from datetime import datetime
-
-
-class ContactExistsError(Exception):
-    ...
-
-
-class ContactDoesNotExistError(Exception):
-    ...
-
-
-class PhoneExistsError(Exception):
-    ...
-
-
-class PhoneDoesNotExistError(Exception):
-    ...
-
-
-class OnlyNumbersError(Exception):
-    ...
-
-
-class AddressBookIsEmptyError(Exception):
-    ...
-
+from errors import *
+from output_messages import *
 
 class AddressBook(UserDict):
     def add_record(self, name: str, phone: str, birthday: str | None = None) -> str:
@@ -33,16 +10,16 @@ class AddressBook(UserDict):
             raise ContactExistsError
         else:
             self.data[name] = Record(name, phone, birthday)
-            return f'Contact with name {name} and phone {phone} was successfully added!'
+            return ContactAddedMessage.message(name, phone)
 
     def delete_record(self, name: str) -> str:
         if name not in self.data:
             raise ContactDoesNotExistError
         else:
             self.data.pop(name)
-            return f'Contact with name {name} was successfully removed!'
+            return PhoneDeletedMessage.message(name)
 
-    def search(self, arguments):
+    def search(self, arguments) -> str:
         match_contacts = []
         for name, contact in self.data.items():
             if arguments in name:
@@ -52,7 +29,7 @@ class AddressBook(UserDict):
                 if arguments in phone.value:
                     match_contacts.append(name)
                     break
-        return f'List of matches: {match_contacts}' if match_contacts else None
+        return SearchMatchesMessage.message(match_contacts)
 
 
 class Record:
@@ -65,36 +42,37 @@ class Record:
         if self.get_phone(user_phone):
             raise PhoneExistsError
         self.phones.append(Phone(user_phone))
-        return f'The phone number {user_phone} was successfully added to contact {self.name.value}!'
+        return PhoneAddedMessage.message(self.name.value, user_phone)
 
     def delete(self, user_phone: str) -> str:
         phone_in = self.get_phone(user_phone)
         if not phone_in:
             raise PhoneDoesNotExistError
         self.phones.remove(phone_in)
-        return f'The phone number {user_phone} was successfully removed from contact {self.name.value}!'
+        return PhoneDeletedMessage.message(self.name.value, user_phone)
 
     def change(self, old_phone: str, new_phone: str) -> str:
         phone_in = self.get_phone(old_phone)
         if not phone_in:
             raise PhoneDoesNotExistError
         phone_in.value = new_phone
-        return f'The phone number {old_phone} in contact {self.name.value} was successfully changed to {new_phone}'
+        return PhoneChangedMessage.message(self.name.value, old_phone, new_phone)
 
-    def get_phone(self, user_phone):
+    def get_phone(self, user_phone) -> str | bool:
         for phone in self.phones:
             if user_phone == phone.value:
                 return phone
         return False
 
-    def days_to_birthday(self):
+    def days_to_birthday(self) -> str:
         if self.birthday.value is None:
             return None
         today = datetime.today()
         birthday = self.birthday.value.replace(year=today.year)
         if birthday < today:
             birthday = self.birthday.value.replace(year=today.year + 1)
-        return (birthday - today).days
+        days = (birthday - today).days
+        return DaysToBirthdayMessage.message(self.name.value, days)
 
 
 class Field:
